@@ -1,0 +1,25 @@
+server:
+  port: 8701
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
+      enabled: true
+
+spring:
+  application:
+    name: mcp-gateway
+  main:
+    banner-mode: off
+    # stdio 模式打开，sse 模式，注释掉。
+    # web-application-type: none
+
+logging:
+  level:
+    site.kuril.mcpgateway: DEBUG
+    org.springframework.ai.mcp: DEBUG
+  # stdio 模式打开，sse 模式，注释掉。
+  #  pattern:
+  #    console:
+  file:
+    name: data/log/${spring.application.name}.log
