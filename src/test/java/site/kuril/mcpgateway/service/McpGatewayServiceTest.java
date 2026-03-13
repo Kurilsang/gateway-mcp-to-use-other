@@ -54,7 +54,7 @@ class McpGatewayServiceTest {
 
     @Test
     void testGetCompaniesInCity() {
-        var companies = mcpGatewayService.getCompaniesInCity("beijing");
+        java.util.List<java.util.Map<String, String>> companies = mcpGatewayService.getCompaniesInCity("beijing");
         assertNotNull(companies);
         assertFalse(companies.isEmpty());
         assertTrue(companies.size() > 0);

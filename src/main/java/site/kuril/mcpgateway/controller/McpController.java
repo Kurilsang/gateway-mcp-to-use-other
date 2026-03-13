@@ -92,6 +92,91 @@ public class McpController {
     }
 
     /**
+     * 调用MCP工具
+     */
+    @PostMapping("/mcp/tools/call")
+    public Map<String, Object> callTool(@RequestBody Map<String, Object> request) {
+        String toolName = (String) request.get("name");
+        Map<String, Object> arguments = (Map<String, Object>) request.get("arguments");
+        
+        log.info("调用工具: {}, 参数: {}", toolName, arguments);
+        
+        try {
+            Object result = null;
+            
+            switch (toolName) {
+                case "getCompanyEmployee":
+                    // 解析参数并调用服务
+                    result = mcpGatewayService.getCompanyEmployee(parseCompanyEmployeeRequest(arguments));
+                    break;
+                case "getCompanyInfo":
+                    String companyName = (String) arguments.get("companyName");
+                    String city = (String) arguments.get("city");
+                    result = mcpGatewayService.getCompanyInfo(companyName, city);
+                    break;
+                case "getCompaniesInCity":
+                    String cityName = (String) arguments.get("city");
+                    result = mcpGatewayService.getCompaniesInCity(cityName);
+                    break;
+                case "getCurrentTime":
+                    result = mcpGatewayService.getCurrentTime();
+                    break;
+                case "callExternalApi":
+                    String apiName = (String) arguments.get("apiName");
+                    String params = (String) arguments.get("params");
+                    result = mcpGatewayService.callExternalApi(apiName, params);
+                    break;
+                default:
+                    return Map.of(
+                        "success", false,
+                        "error", "Unknown tool: " + toolName
+                    );
+            }
+            
+            return Map.of(
+                "success", true,
+                "result", result,
+                "toolName", toolName
+            );
+            
+        } catch (Exception e) {
+            log.error("工具调用失败: {}", e.getMessage(), e);
+            return Map.of(
+                "success", false,
+                "error", e.getMessage(),
+                "toolName", toolName
+            );
+        }
+    }
+    
+    private site.kuril.mcpgateway.model.CompanyEmployeeRequest parseCompanyEmployeeRequest(Map<String, Object> arguments) {
+        site.kuril.mcpgateway.model.CompanyEmployeeRequest request = new site.kuril.mcpgateway.model.CompanyEmployeeRequest();
+        
+        // 解析xxxRequest01
+        Map<String, Object> request01 = (Map<String, Object>) arguments.get("xxxRequest01");
+        if (request01 != null) {
+            request.setCity((String) request01.get("city"));
+            
+            Map<String, Object> company = (Map<String, Object>) request01.get("company");
+            if (company != null) {
+                site.kuril.mcpgateway.model.CompanyEmployeeRequest.Company companyObj = 
+                    new site.kuril.mcpgateway.model.CompanyEmployeeRequest.Company();
+                companyObj.setName((String) company.get("name"));
+                companyObj.setType((String) company.get("type"));
+                request.setCompany(companyObj);
+            }
+        }
+        
+        // 解析xxxRequest02
+        Map<String, Object> request02 = (Map<String, Object>) arguments.get("xxxRequest02");
+        if (request02 != null) {
+            request.setEmployeeName((String) request02.get("employeeCount")); // 注意：这里employeeCount实际是员工姓名
+        }
+        
+        return request;
+    }
+
+    /**
      * 健康检查
      */
     @GetMapping("/mcp/health")
